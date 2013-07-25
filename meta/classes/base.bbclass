@@ -341,6 +341,25 @@ base_do_compile() {
 	fi
 }
 
+base_do_compile_prepend() {
+    CCACHE_BIN=`which ccache`
+    if [ -n "${CCACHE_BIN}" ]; then
+        rm -rf ${WORKDIR}/bin
+        mkdir -p ${WORKDIR}/bin
+
+        ln -sf ${CCACHE_BIN} ${WORKDIR}/bin/`echo ${CC} | awk '{print $1}'`
+        ln -sf ${CCACHE_BIN} ${WORKDIR}/bin/`echo ${CXX} | awk '{print $1}'`
+        export PATH=${WORKDIR}/bin:$PATH
+
+        export CCACHE_BASEDIR="`pwd`"
+        export CCACHE_LOGFILE=/tmp/ccache.log
+        export CCACHE_COMPILERCHECK="none"
+
+        export CCACHE_DIR="${HOME}/.ccache"
+        unset CCACHE_DISABLE
+    fi
+}
+
 addtask install after do_compile
 do_install[dirs] = "${D} ${S} ${B}"
 # Remove and re-create ${D} so that is it guaranteed to be empty
